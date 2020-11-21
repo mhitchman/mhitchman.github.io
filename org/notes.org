@@ -1,0 +1,92 @@
+#+TITLE: Notes
+#+OPTIONS: toc:2
+#+OPTIONS: num:nil
+#+OPTIONS: broken-links:nil
+#+OPTIONS: prop:nil d:t
+
+* C++
+** Back to Basics: Move Semantics (part 1)
+   :SOURCE:
+   *Author:* Klaus Iglberger
+   *Source:* https://www.youtube.com/watch?v=St0MNEU5b0o
+   :END:
+*** Lvalues and Rvalues
+ Lvalues have a name, there is an identifier that the programmer provides to represent the object.
+ Rvalues don't have a name.
+ It used to be rvalues only appeared on the right side of an assignment (thus right values) 
+ (though lvalues could be on both sides) but that's no longer true.
+ #+BEGIN_SRC c++
+ int i = 3 + 2; // i is an lvalue and '3+2' is an rvalue
+ int x = i; // both x and i are lvalues
+ #+END_SRC
+ =v2 = v1= is a copy since 'v1' is a lvalue and so binds to a reference.
+ Rvalue references were added to distinguish between lvalues and rvalues in function arguments 
+ [maybe elsewhere too, not sure] and are signified by =&&= (as in =vector<int>&&=).
+ Rvalues will bind to rvalue references which is why rvalue references are the 
+ arguments of move operations.
+
+ =std::move= itself doesn't actually move anything it just unconditionally casts an lvalue 
+ to an rvalue reference (technically called an Xvalue (expiring value)).
+ This will cause a move operation to be used.
+
+*** Move Operations
+ If all member variables of a class have move operations defined (or are POD) then allow the 
+ compiler to generate the move operations of the class.
+ The move operations need to be defined if there are resources to be managed.
+ **Remember the rvalue reference passed into a move operator is itself an lvalue.**
+ #+BEGIN_SRC c++
+ MyClass& operator=(MyClass&& c) {
+     // c is an lvalue (it has a name)
+     this->member = c.member; // so this would be a copy
+     // so should do
+     this->member = std::move(c.member);
+ }
+ #+END_SRC
+
+ When defining move operations make sure to explicitely move all the members that need it.
+ The easiest thing to do is just call =std::move= on all members variables.
+ This won't affect fundamental types (it will still do the copy) but it keeps everything 
+ looking the same and nothing will be accidentally missed.
+
+ A move constructor has two phases:
+   1) Member-wise move
+   2) Reset the source object (setting pointer to null). Otherwise the two objects would free the
+      same memory when destroyed.
+ If only 1) is present then the default move constructor can be used.
+
+ A move assignment operator has three phases: 
+   1) Cleanup original resources in the destination object. This duplicates the destructor.
+   2) Member-wise move.
+   3) Reset the source object (setting pointers to null).
+ If 2) is the only step present then the default move assignment operator can be used.
+
+ =std::exchange= can set the a pointer and return the original value (to make the reset step 
+ easier).
+
+ *Mark move operations noexcept.*
+ This can lead to performance improvements.
+ Move operations should leave the source object in valid but undefined 
+ (though preferably default) state.
+
+*** Default Move Ops
+ Default move ops are generated if no copy operations or the destructor are user defined.
+ Default copy ops are generated if no move operations are user-defined.
+ "User-defined" includes setting ==default= and ==delete=.
+ Don't define any of the default operations if you don't need to (Rule of Zero).
+ If you define any of the default operations (destructor, move constructor, move assignment, copy constructor, copy assignment) define all of the them (Rule of Five).
+* COMMENT local vars
+#+BEGIN_SRC emacs-lisp
+  (defun my-org-export-format-drawer (name content)
+    (message
+    (let ((content (mapcar #'string-trim (split-string content "\n"))))
+      (concat (reduce (lambda (one two) (concat one (unless (or (string= one "<p>")
+                                                                (string= two "") ; To catch the last run
+                                                                (string= two "</p>"))
+                                                      "<br/>")
+                                                two))
+                      content)))))
+  (setq org-html-format-drawer-function 'my-org-export-format-drawer)
+#+END_SRC
+# Local Variables:
+# org-use-sub-superscripts: {}
+# End:
