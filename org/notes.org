@@ -835,7 +835,7 @@
  The reporter can be customised.
  Custom verification functions can be created for results that aren't text or not normal.
  [The example was she wrote a custom comparison function which ignores differences under a threshold for picture outputs.]
-** C++ Sanitizers and Fuzzing for the Windows Platform Using New Compilers :cpp:
+** C++ Sanitizers and Fuzzing for the Windows Platform Using New Compilers
    :SOURCE:
    :Author:   Jim Radigan
    :Source:   https://www.youtube.com/watch?v=0EsqxGgYOQU
@@ -894,7 +894,7 @@
      - exception is when the assigned to variable is also =const=
    - clang-tidy has check for string -> cstring -> string conversions
    - member variables should not be const?
-** Rethinking Exceptions                                                :cpp:
+** Rethinking Exceptions
    :SOURCE:
    :Author:   Jason Turner
    :Source:   https://www.youtube.com/watch?v=OkgvqjJzH_Y
