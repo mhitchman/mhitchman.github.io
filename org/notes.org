@@ -4,6 +4,7 @@
 #+OPTIONS: broken-links:nil
 #+OPTIONS: prop:nil d:t
 
+#+HTML_HEAD: <style>pre.src{background:slategray ;color:white;} body{width:90%; margin:2% auto} @media screen and (min-width:910px) {body{width:900px}}</style>
 #+HTML_DOCTYPE: html5
 
 * C++                                                                   :cpp:
