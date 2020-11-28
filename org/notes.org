@@ -77,6 +77,52 @@
  "User-defined" includes setting ==default= and ==delete=.
  Don't define any of the default operations if you don't need to (Rule of Zero).
  If you define any of the default operations (destructor, move constructor, move assignment, copy constructor, copy assignment) define all of the them (Rule of Five).
+** Back to Basics: Move Semantics (part 2)
+   :SOURCE:
+   :Author: Klaus Iglberger
+   :Source: https://www.youtube.com/watch?v=pIzaZbKUw2s
+   :END:
+An rvalue reference is a forwarding reference if it is involved in type deduction or appears 
+in the form =T&&= when part of a function template.
+This is not the case for class template parameters.
+Forwarding references will represent lvalue references if initialized with an lvalue or an 
+rvalue reference if initialized with an rvalue.
+
+Passing an lvalue to the following function results in =T= referring to a lvalue reference 
+which results in =T& &&=.
+*Reference collapsing* makes it =T&=.
+But passing it an rvalue makes it =T&&=.
+#+BEGIN_SRC cpp
+template <class T>
+foo(T&& t)
+#+END_SRC
+
+*Perfect Forwarding* forwards arguments without copying them.
+An example is =make_unique= passing arguments to create a =unique_ptr=.
+A forwarding reference will accept anything.
+
+=std::forward= casts rvalues to rvalue references and lvalues to lvalue references.
+The type gets provided as a template parameter and used for the cast decision.
+=std::forward= makes use of reference collapsing for its behaviour.
+
+=std::move= actually takes a forwarding reference.
+
+An overloaded function that takes a forwarding reference will always be called unless 
+another overloaded function matches the given arguments exactly.
+
+=const T&&= is an rvalue reference, not a forwarding reference.
+
+Don't return with a =std::move=, this will break return value optimization (RVO) (copy elision).
+Not naming the value being returned (making it an rvalue) guarantees RVO even if there is no 
+copy or move constructor.
+The compiler will fall back to moving if RVO doesn't work.
+
+Don't return an rvalue reference.
+
+Be careful to remove references from forward references when doing checking the type using 
+=remove_reference_t=.
+For example checking if the given type is integral using =is_integral_v= will always be false when 
+given an lvalue reference.
 ** API Design for C++
    :SOURCE:
    :Author:   Martin Reddy
