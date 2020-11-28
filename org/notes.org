@@ -862,6 +862,26 @@ given an lvalue reference.
  - Don't use temporary names because nothing written in the code will make you change it.
     Instead just name things as best as you can and then fix it later.
  - Always fix a name when you understand it.
+** Postmodern C++
+   :SOURCE:
+   :Author: Tony van Eerd
+   :Source: https://www.youtube.com/watch?v=Zx_Tjp9WIII
+   :END:
+
+When not following a typical pattern leave a comment explaining why not (eg. when using a container 
+other than vector).
+
+An API is defined by the calling code more than by the implementation.
+How people use it *is* the API.
+
+Give a function only when it needs rather than everything in an object to let it take what it wants.
+
+Flexible formatting can aid with communication.
+
+Spin things into their own functions.
+It doesn't have to be used multiple times.
+
+[Quite an entertaining talk, notes don't really cover it.]
 ** Quickly Testing Legacy C++ Code with Approval Tests
    :SOURCE:
    :Author:   Clare Macrae
