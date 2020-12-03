@@ -961,6 +961,59 @@ It doesn't have to be used multiple times.
      - exception is when the assigned to variable is also =const=
    - clang-tidy has check for string -> cstring -> string conversions
    - member variables should not be const?
+** Great C++ =is_trivial=
+   :SOURCE:
+   :Author: Jason Turner
+   :Source: https://www.youtube.com/watch?v=ZxWjii99yao
+   :END:
+RVO doesn't happen when returning structured bindings since they end up pointing to a hidden structure.
+In that case it makes sense to return with =std::move=.
+
+=is_trivially_destructible=: default destructor is trivial.
+Defining a destructor makes it not trivial.
+Having a non-trivially destructible member makes it non-trivially destructible.
+
+=is_trivially_copyable=: needs a non-deleted destructor.
+Needs a trivial copy constructor, move constructor, copy assign operator, move assign operator and
+destructor.
+
+=is_trivially_constructible=: can't call non-trivial operator during construction.
+It takes the type and the arguments that would be passed to the constructor.
+A non-default constructor is not trivial.
+
+=is_trivially_default_constructible=: pretty much the default constructor doesn't do anything.
+The following isn't trivial default constructible because the compiler generates a constructor 
+that sets =i= to 0.
+#+BEGIN_SRC cpp
+struct S {
+  int i{};
+};
+#+END_SRC
+Not so important since it makes initialization so painful.
+
+=is_trivially_copy_constructible=: trivially constructible with itself.
+The =S= struct above is trivially copy constructible.
+
+=is_trivially_assignable=: won't call non-trivial operations.
+
+There are load of other =is_trivially_= checks.
+
+=is_trivial=: includes basic types and class types that are trivially constructible and have a default 
+constructor that is trivial (and does not have virtual functions).
+
+Out parameters open the door for UB if it captures an uninitialised variable.
+
+=std::array= is trivial if it contains a trivial type.
+
+Things that can't be trivial include:
+- anything with a destructor
+- runtime polymorphic objects
+- anything using the heap (or dealing with resource)
+
+Rule of Zero gives the compiler lots of room to optimize code.
+
+Triviality is important when writing =constexpr= friendly code.
+
 ** Rethinking Exceptions
    :SOURCE:
    :Author:   Jason Turner
