@@ -660,6 +660,81 @@ given an lvalue reference.
  - =uninitialized_*=: work with =fill_copy=, and =move= to have them work on uninitialized memory. To work with raw memory.
  - =destroy=: calls destructor for every element.
  - =*_n=: does the algorithm but takes a size and only does that many steps
+** Back to Basics: Understanding Value Categories
+   :SOURCE:
+   :Author: Ben Saks
+   :Source: https://www.youtube.com/watch?v=XS2JddPq7GQ
+   :END:
+Originally an lvalue was an expression that refered to an object that had storage.
+And an rvalue wasn't an lvalue.
+
+When an lvalue is used in the place of an rvalue an lvalue-to-rvalue-conversion occurs as the compiler only cares
+about the value the object has rather than the storage.
+
+Rvalues of class types occupy storage so that they can access members.
+
+#+ATTR_HTML: :rules all :frame border
+|                                 | *can take the address of* | *can assign to* |
+| *lvalue*                        | yes                       | yes             |
+| *non-modifiable lvalue (const)* | yes                       | no              |
+| *(non-class) rvalue*            | no                        | no              |
+
+References work like const pointers.
+References yield lvalues.
+
+Creating a reference to const of type =T= with an expression that is not of type =T= will create 
+a temporary =T= and then get the reference of that.
+The temporary lives for as long as the reference does.
+
+Temporary materialization conversion: converts an prvalue to an xvalue.
+It happens in the case of the reference to const example.
+
+C++11 added rvalue references. 
+They are normally used for function parameters and return values with move semantics.
+But =int&& i = 10;= is something you can do since 10 is an rvalue.
+
+If it has a name its an lvalue.
+
+Binding rvalue references to rvalues creates an xvalue.
+
+=std::move= converts lvalues to xvalues (an unnamed rvalue reference).
+It's the way to inform the compiler that an lvalue is about to expire.
+
+#+name: value-categories
+#+header: :results output graphics file
+#+header: :imagemagick yes :headers '("\\usepackage{tikz}")
+#+header: :fit yes :iminoptions -density 1000 :imoutoptions -geometry 300
+#+BEGIN_SRC latex :file images/value-categories.png
+  \usetikzlibrary{arrows,positioning}
+  \tikzset{
+    >=stealth',
+    pil/.style={
+      ->,
+      thick,
+      shorten <=2pt,
+      shorten >=2pt,
+    }
+  }
+  \begin{tikzpicture}[node distance=1cm, auto,]
+    \node (lvalue) {lvalue};
+    \node[right=of lvalue] (xvalue) {xvalue};
+    \node[right=of xvalue] (prvalue) {prvalue};
+    \node[above=of xvalue] (dummy) {};
+    \node[left=of dummy] (glvalue) {glvalue}
+    edge[pil] (lvalue)
+    edge[pil] (xvalue);
+    \node[right=of dummy] (rvalue) {rvalue}
+    edge[pil] (xvalue)
+    edge[pil] (prvalue);
+    \node[above=of dummy] (expression) {expression}
+    edge[pil] (rvalue)
+    edge[pil] (glvalue);
+  \end{tikzpicture}
+#+END_SRC
+- *glvalue*: generalized value
+- *xvalue*: behave like rvalues and lvalues (they occupy storage)
+- *prvalue (pure rvalue)*: always behave like rvalue and never occupy storage
+
 ** Beginners Guide to Linkers
    :SOURCE:
    :Author:   David Drysdale
@@ -3481,6 +3556,8 @@ Would probably be good if I had looked into allocators ahead of time but needed 
                                                 two))
                       content))))
   (setq org-html-format-drawer-function 'my-org-export-format-drawer)
+  (org-babel-do-load-languages
+  'org-babel-load-languages '((latex . t)))
 #+END_SRC
 # Local Variables:
 # org-use-sub-superscripts: {}
