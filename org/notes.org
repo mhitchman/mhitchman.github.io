@@ -2287,6 +2287,44 @@ Triviality is important when writing =constexpr= friendly code.
    :Author:   Fabian Renn-Giles & Dave Rowland
    :Source:   https://www.youtube.com/watch?v=Q0vrQFyAdWI
    :END:
+#+name: real-time
+#+header: :results output graphics file
+#+header: :imagemagick yes :headers '("\\usepackage{tikz}")
+#+header: :fit yes :iminoptions -density 1000 :imoutoptions -geometry 400
+#+BEGIN_SRC latex :file images/real-time.png
+  \usetikzlibrary{shapes.geometric,arrows,positioning}
+  \tikzstyle{startstop} = [rectangle, text width=4cm, minimum width=1cm, minimum height=1cm, text centered, draw=black]
+  \tikzstyle{arrow} = [thick,->,>=stealth]
+  \begin{tikzpicture}[node distance=2cm, auto,]
+    \node (start) [startstop] {Sharing or passing object between threads?};
+    %% The direction should be wrong but it doesn't work without it like this
+    \node[right=of start] (FIFO) {FIFO};
+    \draw [arrow] (start) -- node[anchor=south]{Passing}(FIFO);
+    \node[startstop, below of=start] (RTThread) {Interacting with a RT thread?};
+    \draw[arrow] (start) -- node[anchor=west]{Sharing}(RTThread);
+    \node[right=of RTThread] (Locks) {Use locks};
+    \draw[arrow] (RTThread) --node[anchor=south] {No}(Locks);
+    \node[startstop, below of=RTThread] (lockFree) {Shared data is\_always\_lockfree?};
+    \draw[arrow] (RTThread)--node[anchor=west]{Yes}(lockFree);
+    \node[right=of lockFree] (atomic) {Use std::atomic};
+    \draw[arrow] (lockFree)--node[anchor=south]{Yes}(atomic);
+    \node[startstop, below of=lockFree] (acquireResource) {Failure to acquire resource OK?};
+    \draw[arrow] (lockFree)--node[anchor=west]{No}(acquireResource);w
+    \node[right=of acquireResource] (trylock) {Use trylock};
+    \draw[arrow] (acquireResource)--node[anchor=south]{Yes}(trylock);
+    \node[startstop, below of=acquireResource] (RTThread) {Does RT thread mutate object?};
+    \draw[arrow] (acquireResource)--node[anchor=west]{No}(RTThread);
+    \node[right=of RTThread] (CAS) {CAS loop};
+    \draw[arrow] (RTThread)--node[anchor=south]{No}(CAS);
+    \node[startstop, below of=RTThread] (nonRTThread) {Does nonRT thread mutate object?};
+    \draw[arrow] (RTThread)--node[anchor=west]{Yes}(nonRTThread);
+    \node[right=of nonRTThread] (buffer) {Double buffering};
+    \draw[arrow] (nonRTThread)--node[anchor=south]{No}(buffer);
+    \node[below of=nonRTThread] (combo) {CAS loop/FIFO combo};
+    \draw[arrow] (nonRTThread)--node[anchor=west]{Yes}(combo);
+  \end{tikzpicture}
+#+END_SRC
+
  Real-time: correctness relies on the logical output and the time it was returned.
  Audio: Hard to firm real-time system.
  RT thread gets an uninterrupted period to run in.
