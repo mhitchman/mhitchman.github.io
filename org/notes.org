@@ -1328,6 +1328,60 @@ Triviality is important when writing =constexpr= friendly code.
      - CU DIE lookup with =dwfl_module_addrdie=
    - Runtime Attaching
      - Code injection: open debugger and call =dlopen=
+** Algorithm Intuition (part 1 of 2)
+   :SOURCE:
+   :Author:   Conor Hoekstra
+   :Source:   https://www.youtube.com/watch?v=pUEnO6SvAMo
+   :END:
+- =minmax_element= gives pair with min and max of the container.
+- =std::cbegin= & =std::cend= are const versions of =std::begin/end= (return 
+  const iterators).
+- If you find yourself writing simple lambdas check the operators in 
+  the functional header.
+- =iota= can be used to create a sequence. =iota(begin(v), end(v), 1);= 
+  produces 1,2,3...,size of v
+- Lots of the other algorithms can be implemented using =reduce= (called fold 
+  in other languages)
+- =inner_product= takes two ranges and two lambdas.
+  - The second lambda is called first then the first lambda is called to reduce the
+    results to a single value.
+- =transform_reduce=: is like =inner_product= but the second lambda can be unary (so 
+  transform can act on one value at a time rather than doing a zip).
+- [Conor thinks using STL algorithms would mean needing to debug less but the debugger 
+  would still jump in and out of the lambda]
+** Algorithm Intuition (part 2 of 2)
+   :SOURCE:
+   :Author:   Conor Hoekstra
+   :Source:   https://www.youtube.com/watch?v=sEvYmb3eKsw
+   :END:
+- The argument against using =inner_product= is that it has a bad name. It doesn't
+  say what it does.
+- =partial_sum= sums a collection but returns a list of results for each sum.
+  =[1,1,1,1,1] -> [1,2,3,4,5]=
+  Though it takes a lambda so doesn't just need to sum.
+  - It's useful if you regularly need to sum from the beginning to various points in
+    an array.
+  - =inclusive_scan= does the same thing.
+    - =exclusive_scan= is the same but it takes an initial value (so one extra value 
+      would be in the result).
+- =adjacent_difference= can be seen as a specialized =transform=.
+
+#+ATTR_HTML: :rules all :frame border
+| Algorithm                        | Indexes Viewed | Accumulator | Reduce / Transform | Default Op     | Filter aka _if |
+|----------------------------------+----------------+-------------+--------------------+----------------+----------------|
+| accumulate / reduce              |              1 | Yes         | Reduce             | plus{}         |                |
+| inner_product / transform_reduce |              1 | Yes         | Reduce             | plus{}, mult{} |                |
+| partial_sum / inclusive_scan     |              1 | Yes         | Transform          | plus{}         |                |
+| exclusive_scan                   |              1 | Yes         | Transform          | plus{}         |                |
+| adjacent_difference              |              2 | No          | Transform          | minus{}        |                |
+| transform_inclusive_scan         |              2 | Yes         | Transform          |                |                |
+| adjacent_reduce                  |              2 | Yes         | Reduce             |                |                |
+| adjacent_find                    |              2 | No          | Reduce             | equal_to{}     |                |
+| transform                        |              1 | No          | Transform          |                |                |
+| find*                            |              1 | No          | Reduce             |                |                |
+| iota                             |            N/A | N/A         | Transform          |                |                |
+Even if the algorithm looks at two containers but uses the same position it counts as an index of 1.
+
 ** Hello World From Scratch
    :SOURCE:
    :Author:   Peter Bindels & Simon Brand
@@ -2386,6 +2440,43 @@ Turn on the thread sanitizer.
 - Don't miss deadlines.
 - Beware hidden costs.
 - Use instrumentation. It's very difficult to reason about RT code.
+** Building a Spatial Audio Plug-In
+   :SOURCE:
+   :Author:   Allen Lee
+   :Source:   https://www.youtube.com/watch?v=A7DwT5Aa1dQ
+   :END:
+The Head Related Impulse Response (HRIR) encodes the Intra-aural Level Difference (ILD) 
+and Intra-aural Time Difference (ITD).
+The Head Related Transfer Function (HRFT) is the FFT of the HRIR.
+Applying the HRTF directly to sounds makes them sound like they are coming from inside
+the head.
+Room reverberation is important for externalizing the sound.
+
+Spatially Oriented Format for Acoustics (SOFA) is a file format for storing HRIRs (since
+they often contain measurements for many different angles).
+It also stores the number of measurements and the sampling frequency.
+
+Applying HRTFs can be as easy as applying an FIR filter.
+Doing it in the frequency domain can be faster: FFT of input x FFT of HRIR then apply
+the inverse FFT.
+
+*Overlap & Add:*
+1. Split the signal into N blocks of size M
+2. Take the block starting at sample k and perform FFT
+3. Do processing
+4. Perform inverse FFT
+5. Shift the output by k
+6. At the end all the blocks are added
+
+*Zero padding*
+
+Changing between HRTFs (moving the sound source) causes noise.
+His solution was to process the audio with the old and new HRTFs and then cross-fade the 
+results.
+
+Using Constant Overlap and Add (COLA) windowing further reduces artifacts.
+
+He adds reverb to the original signal then mixes it with the binaural sound.
 ** Interactive Audio Plug-in Development with the Wwise SDK
    :SOURCE:
    :Author:   Joel Robichaud
