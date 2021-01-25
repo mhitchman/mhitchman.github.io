@@ -158,7 +158,7 @@ given an lvalue reference.
  In the case that you actually want copies to share the impl then use a =shared_ptr= to 
  avoid the impl being deleted twice (by the copy and by the original).
 
- Dependency injection involves passing an objectinto a class rather than having the class create
+ Dependency injection involves passing an object into a class rather than having the class create
  and store the object itself.
  This saves the class needing to know the details needed to initialize the dependency object.
  It provides an alternative to a singleton because the passed object could be global but it is
@@ -180,17 +180,17 @@ given an lvalue reference.
  API architecture should be designed to anticipate changes in requirements that are likely
  in the future.
 
- Once constraints and requirements are analyzed, create the key objects and how they fit together.
+ Once constraints and requirements are analysed, create the key objects and how they fit together.
  These are the major abstractions of the system.
  Deciding key objects can be done in several ways though the results of all these methods should be
- analyzed and refined:
+ analysed and refined:
  - *Natural language*: Based on how you talk about the problem.
    - Nouns become objects.
    - Verbs become functions.
-   - Abjectives become properties.
- - *Properties*: Group objects with similiar properties or qualities. These can be discrete 
+   - Adjectives become properties.
+ - *Properties*: Group objects with similar properties or qualities. These can be discrete 
    (eg. red/blue) or fuzzy (eg. genres).
- - *Behaviors*: Determine the behaviours of the system and assign them to different parts.
+ - *Behaviours*: Determine the behaviours of the system and assign them to different parts.
    Group objects on their shared behaviours.
  - *Domains (Schlaer-Mellor)*: Split the system vertically into generic domains.
    Then split each of those domains.
@@ -198,9 +198,9 @@ given an lvalue reference.
  *Friends in classes are normally a sign of bad design.*
 
  More than 2 or 3 levels of inheritance is getting too complex.
- Avoid multiple inheritance except for interiting from interfaces.
+ Avoid multiple inheritance except for inheriting from interfaces.
 
- "The Liskov Substitution Principle states it should always be possible to substitue a base class 
+ "The Liskov Substitution Principle states it should always be possible to substitute a base class 
  for a derived class without any change in behaviour."
 
  Private inheritance makes public methods of a base class private members of the derived class.
@@ -209,7 +209,7 @@ given an lvalue reference.
 
  Composition is when functionality is inherited by having an object as a member rather than 
  through private inheritance.
- It should be prefered over inheritance because it results in a less coupled design.
+ It should be preferred over inheritance because it results in a less coupled design.
  Also it supports using an opaque pointer.
 
  The Law of Demeter says to only call functions from within your class; so member functions or
@@ -249,7 +249,7 @@ given an lvalue reference.
  The copy constructor is called when an object is:
  - constructed from another
  - passed or returned by value
- - placed in an initialiser list
+ - placed in an initializer list
  - thrown or caught as an exception
 
  Assignment operator guidelines:
@@ -269,7 +269,7 @@ given an lvalue reference.
  Put the implementation in a "private" header that is included into the main public header.
  It keeps the public header cleaner.
 
- Templates can be explicitely instantiated for specific types in a .cpp file.
+ Templates can be explicitly instantiated for specific types in a .cpp file.
  The implementation can then live in the .cpp file.
  Then add typedefs to the header so a user knows which types they can use.
  This results in faster build times and is useful if you only want to use the template with specific
@@ -283,7 +283,7 @@ given an lvalue reference.
  Always prefer to define the remaining operators as free style functions since it:
  - means operands can be on the left and right
  - reduces coupling (operator can't access private members)
- The exception is if the operator needs private acces (don't make it a friend instead).
+ The exception is if the operator needs private access (don't make it a friend instead).
 
  The C-style cast operator looks like 
  #+BEGIN_SRC C++
@@ -298,7 +298,7 @@ given an lvalue reference.
 
  Prevent symbols from having external linkage by enclosing them in an anonymous namespace.
  This stops you from accessing global functions/variables from other namespaces using =extern=.
- Similiar to what =static= does.
+ Similar to what =static= does.
 *** Chapter 7: Performance
  Consider adding "redundant include guards" around =#include= statements to speed up compilation.
  They will prevent the opening and processing of header files that have already been read.
@@ -350,7 +350,7 @@ given an lvalue reference.
  more resilient to memory errors (like double frees and single byte buffer overruns).
  It can be useful for debugging memory problems.
 
- Helgrind & DRD are part of Valgrind and detect synchronisation errors in P-thread based 
+ Helgrind & DRD are part of Valgrind and detect synchronization errors in P-thread based 
  applications.
 
 *** Chapter 8: Versioning
@@ -359,10 +359,10 @@ given an lvalue reference.
  information (functions could be =constexpr= to make it available at compile time).
  It can have =IsAtLeast= and =HasFeature= methods to check the API.
 
- *Source compatability:* the user can compile their code against a later API without making any
+ *Source compatibility:* the user can compile their code against a later API without making any
  changes.
 
- *Binary compatability:* users only have to relink to use the new API.
+ *Binary compatibility:* users only have to relink to use the new API.
  The PIMPL idiom can help since the implementation is hidden.
  Binary compatible changes in C++ include:
  - Adding new classes and non-virtual methods
@@ -372,7 +372,7 @@ given an lvalue reference.
  - Changing implementation of inline method (though recompilation is needed to get new implementation)
  - Changing a method's default arguments (recompilation needed to use the new defaults)
  - Adding/removing friend declarations
- - Appending new enumations to an existing enum
+ - Appending new enumerations to an existing enum
  - Using unclaimed remaining bits in a bit field
 
  Adding functionality is normally fine for backwards compatibility. 
@@ -478,7 +478,7 @@ given an lvalue reference.
  Tests get stored as data
 
  Gcov is a code coverage tool that's part of GCC.
- Suggets different code coverage targets depending on how code coverage is measured: 
+ Suggests different code coverage targets depending on how code coverage is measured: 
  100% by function, 90% by line or 70% by condition coverage.
 *** Chapter 12: Extensibility
  /Never inherit from a class without a virtual destructor./
@@ -486,7 +486,7 @@ given an lvalue reference.
  STL streams are designed to be inherited from.
  Boost iostreams has things like filters and compression.
 
- Explicitely prevent people from inheriting from a class by making the constructors private and use a Factory method instead.
+ Explicitly prevent people from inheriting from a class by making the constructors private and use a Factory method instead.
  This prevents it from being constructed on the stack.
 
  An alternative is to use virtual inheritance, which will work on the stack:
@@ -516,7 +516,7 @@ given an lvalue reference.
  #+END_SRC
  T is the type the smart pointer will point to, the others are policies.
 
- *The Curiosly Recurring Template Pattern:* has a class that inherits from a templated base class with 
+ *The Curiously Recurring Template Pattern:* has a class that inherits from a templated base class with 
  the derived class as the template parameter.
  It provides compile time polymorphism.
  The base class can access members from the derived class by casting =this= to the derived class's type (which 
@@ -665,7 +665,7 @@ given an lvalue reference.
    :Author: Ben Saks
    :Source: https://www.youtube.com/watch?v=XS2JddPq7GQ
    :END:
-Originally an lvalue was an expression that refered to an object that had storage.
+Originally an lvalue was an expression that referred to an object that had storage.
 And an rvalue wasn't an lvalue.
 
 When an lvalue is used in the place of an rvalue an lvalue-to-rvalue-conversion occurs as the compiler only cares
@@ -790,7 +790,7 @@ It's the way to inform the compiler that an lvalue is about to expire.
        - Makes circular dependencies tricky but Windows has special method around it
  - =nm --demangle=: shows unmangled symbols
 *** C++ Global Object Construction
- - objects can require code to be run to be initialised (contrast to C, where just value)
+ - objects can require code to be run to be initialized (contrast to C, where just value)
  - compiler creates list of constructors for each C++ file that need to be called for global objects
    - linker combines all lists into 1 & add code to call all constructors
    - order of global object construction is undefined
@@ -916,7 +916,7 @@ It's the way to inform the compiler that an lvalue is about to expire.
  - The wrong names can lie.
  - When refactoring, a method is to use extremely verbose names and then it will become clear what the name should be.
  - =sort= and =partial_sort= are examples of good names.
- - =partial_sort_copy= is an example of a good implementors name but doesn't address the problem that users normally have when they are looking for that function.
+ - =partial_sort_copy= is an example of a good implementers name but doesn't address the problem that users normally have when they are looking for that function.
    =top_n= would have been a better user name.
  - Always call everything by the same name (don't use a different name for users and developers).
  - Don't invent business words for parts of functions.
@@ -924,7 +924,7 @@ It's the way to inform the compiler that an lvalue is about to expire.
  - Don't mismatch natural pairs (begin & end not begin & last)
  - Functions should use verbs with helper verbs if needed (isEmpty() vs. Empty())
  - If you need to use =nodiscard= it means your name confuses people.
- - If similar functions have similar names they will appear together in the IDE autocomplete list.
+ - If similar functions have similar names they will appear together in the IDE auto-complete list.
  - Member function parameters should help the caller.
  - If you are decorating variables to distinguish member variables then decorate members rather than parameters.
  - Classes should be Nouns.
@@ -974,7 +974,7 @@ It doesn't have to be used multiple times.
  It manages saving the output to files (named according to the test name).
  It can take sequences with input and then run the test with every combination of those containers.
  It then shows a graphical diff tool on test failure except when running in CI systems (which it automatically detects apparently).
- The reporter can be customised.
+ The reporter can be customized.
  Custom verification functions can be created for results that aren't text or not normal.
  [The example was she wrote a custom comparison function which ignores differences under a threshold for picture outputs.]
 ** C++ Sanitizers and Fuzzing for the Windows Platform Using New Compilers
@@ -1076,7 +1076,7 @@ There are load of other =is_trivially_= checks.
 =is_trivial=: includes basic types and class types that are trivially constructible and have a default 
 constructor that is trivial (and does not have virtual functions).
 
-Out parameters open the door for UB if it captures an uninitialised variable.
+Out parameters open the door for UB if it captures an uninitialized variable.
 
 =std::array= is trivial if it contains a trivial type.
 
@@ -1096,7 +1096,7 @@ Triviality is important when writing =constexpr= friendly code.
    :END:
  - Why not Exceptions:
    - bloat binary size, can be slower
-   - compiler cannot elide or optimise
+   - compiler cannot elide or optimize
  - Why
    - thread safety - impossible to ignore
    - work with RVO/NRVO
@@ -1116,7 +1116,7 @@ Triviality is important when writing =constexpr= friendly code.
  - if you think function should be noexcept but can't then probably have a design flaw
  - forces you to think about lifetime of code
  - rather than using =-fnoexceptions= use noexcept which makes promise to users
-   - compiler can make the same optimisations
+   - compiler can make the same optimizations
  - provides more semantic information to the compiler
 
 ** Using Freestanding C++ to add C++17 to your Shellcode, UEFI, Embedded Systems
@@ -1131,7 +1131,7 @@ Triviality is important when writing =constexpr= friendly code.
    - requires bunch of compiler flags [6:44] and linker flags [8:45]
    - CMake flags to disable a bunch of features that don't make sense [9:55]
  - The C runtime:
-   - initialises global variables
+   - initializes global variables
    - executes main with args
  - There are a bunch of extra sections in a binary that are needed by C++ features
  - Normally freestanding environment just has =_start= function (no =main=)
@@ -1188,10 +1188,10 @@ Triviality is important when writing =constexpr= friendly code.
    - Number of transistors in CPUs are increasing but are spent on multiprocessing
      - provides wider SIMD
      - if you're not using SIMD you're not fully using the CPU
-   - SIMT expresses parallelism generally but not targetting specific hardware
+   - SIMT expresses parallelism generally but not targeting specific hardware
      - SIMD very hardware focused
    - wrapper libraries provide abstraction over SIMD registers
-   - Vc: SIMD wrapper lib (looking into standardisation)
+   - Vc: SIMD wrapper lib (looking into standardization)
    - SIMD expressed in terms of registers with specific width (eg. 6 floats)
      - =pack=: SIMD register worth of values
        - specify width and type
@@ -1202,7 +1202,7 @@ Triviality is important when writing =constexpr= friendly code.
          - =scatter= and =gather= take offsets to get/put values into elements of a data structure. =gather= could take {1,3,4,8} which would take those elements from an array (for example) and stick them into a pack
        - =reduce=: take all elements in a pack and process down to a single element
          - Always use the algorithm if it is provided because sometimes an instruction exists for doing this.
-   - =#pragma omp for simd=: says to compiler it can vectorise even if it is worried about getting something wrong
+   - =#pragma omp for simd=: says to compiler it can vectorize even if it is worried about getting something wrong
    - Data layouts
      - Array of Structures: AoS
      - Structure of Arrays: SoA: horizontal vectorization. Prefer using this. More scalable. Readable: allows varying native SIMD register size
@@ -1213,7 +1213,7 @@ Triviality is important when writing =constexpr= friendly code.
    :Author:   Eric Niebler, David Hollman
    :Source:   https://www.youtube.com/watch?v=tF-Nz4aRWAM
    :END:
- Concurrency is not the same as parralellism.
+ Concurrency is not the same as parallelism.
  Concurrency: where multiple tasks run with inter-task dependencies.
  The tasks will definitely happen at the same time.
 
@@ -1221,14 +1221,14 @@ Triviality is important when writing =constexpr= friendly code.
  Tasks won't necessarily happen at the same time.
  Parallelism puts less restrictions on the scheduler.
 
- =std::future= does type erasure, allocation and synchronisation (because it has state that gets
+ =std::future= does type erasure, allocation and synchronization (because it has state that gets
  accessed from multiple threads), which makes it slow.
 
  A continuation is work to do after the =future= has finished.
  In Boost futures it is implemented as a =.then= member function.
 
  The talk describes a system of lazy futures, which use higher order functions.
- The system means the futures can be composed and have no allocations, synchronisation, 
+ The system means the futures can be composed and have no allocations, synchronization, 
  or type erasure.
  They also only block when the user wants them to.
 
@@ -1241,7 +1241,7 @@ Triviality is important when writing =constexpr= friendly code.
 
  There's a reference implementation of ideas in Folly.
 
- [Apparently coroutines are pretty cool.]
+ [Apparently co-routines are pretty cool.]
 ** Behind the Scenes of a C++ Build System
    :SOURCE:
    :Author:   Jussi Pakkanen
@@ -1411,7 +1411,7 @@ Even if the algorithm looks at two containers but uses the same position it coun
       - interpret text
       - turn text into linear series of tokens that describe the text
       - After this the compiler no longer uses text
-      - Lexer can be thought of as a statesystem
+      - Lexer can be thought of as a state system
         - it reads 'A' then goes into 'A' state then reads 'B' so goes into 'B' state
         - simple language lexer can just be a switch statement
         - can also use external tool like flex to generate lexer
@@ -1429,9 +1429,9 @@ Even if the algorithm looks at two containers but uses the same position it coun
       - makes it easier to support multiple languages since all languages use same tools
         - only the frontend needs to change
         - in IR want statements to be very simple so splits up statements in AST
-      - Optimisations are made based on analyses
+      - Optimizations are made based on analyses
         - Example is liveness of variable
-          - analyze when a variable is live. If a variable is not used after the beginning of the function then it can be gotten rid of
+          - analyse when a variable is live. If a variable is not used after the beginning of the function then it can be gotten rid of
 *** Compiler Backend
     - takes IR and transforms to assembly
     - Made up of Instruction Selection, Instruction Scheduling, Register Allocation, Target Specific Optimization & Assembly Output
@@ -1439,7 +1439,7 @@ Even if the algorithm looks at two containers but uses the same position it coun
     - Instruction Selection
       - picking ASM instructions to match IR instructions
         - can be macro expansion when each IR instruction is mapped to ASM instruction
-          - this isn't so efficient so use peephole optimization afterward
+          - this isn't so efficient so use peephole optimization afterwards
         - or Selection DAG (this is what LLVM uses)
           - look at IR as a Directive Acyclic Graph and look at patterns that we know are single instructions
       - Instruction Scheduling
@@ -1468,7 +1468,7 @@ Even if the algorithm looks at two containers but uses the same position it coun
      - Global initializers needs to be done before main starts
      - create global initialization function that call the constructor then destructors and objects passed to at =exit= (destroy when done)
      - need something to call this
-       - =_start=: runs global initializor, main, then at exit
+       - =_start=: runs global initializer, main, then at exit
 *From questions*
      - IR features can be added to handle specific feature of higher level languages.
      - Means there is no way for language without that feature to create that IR. So some optimizations may not be triggered for all languages.
@@ -1509,12 +1509,12 @@ Even if the algorithm looks at two containers but uses the same position it coun
    - like compiling but on client end
  - has machine verified formal specification
    - allows everyone to be sure implementations behave the same
- - is a harvard architecture: programs state is separate from its code
+ - is a Harvard architecture: programs state is separate from its code
    - impossible to modify its call stack
  - has structured control flow
    - no goto statement
    - has =block=, =loop= and =if= which allow branching to end, front and out of block
- - Webassembly can't do anything unless allowed to
+ - WebAssembly can't do anything unless allowed to
    - WebAssembly modules are imported to say what can be run
    - can mean web module and non-web module can require different imports
  - WASI: a stripped down POSIX
@@ -1570,9 +1570,9 @@ Even if the algorithm looks at two containers but uses the same position it coun
    - has to be alone in order
    - for aggregate initialisation
  - =Constinit=
-   - forces to be initialised at compile time but isn't actually const (unlike constexpr)
- - range-based for with initialiser
- - Lambdas now default constructable only if it doesn't capture
+   - forces to be initialized at compile time but isn't actually const (unlike constexpr)
+ - range-based for with initializer
+ - Lambdas now default constructible only if it doesn't capture
    - which allows using lambdas as member type
  - Concepts like generic functions =auto f(auto a){}=
  - Can use <template T> syntax with lambdas
@@ -1590,7 +1590,7 @@ Even if the algorithm looks at two containers but uses the same position it coun
    :END:
  - cppbestpractices.com
  - Strong typing
-   - =trivial_type=: trivially copyable, constructable and movable. checked with =is_trivial_v= [creates a strong type with =nodiscard const noexcept= accessor]
+   - =trivial_type=: trivially copyable, constructible and movable. checked with =is_trivial_v= [creates a strong type with =nodiscard const noexcept= accessor]
  - Trailing return types can make it easier to see function name in blocks
  - Downside of constexpr: effectively everything must be in a header since everything must be known at compile time
  - cannot invoke undefined behaviour in a constexpr context
@@ -1649,7 +1649,7 @@ Even if the algorithm looks at two containers but uses the same position it coun
    - length of symbols has cost on symbol lookup since entire symbol of successful lookup has to be checked
    - Can be sped up by using shorter names
      - Potentially alias/wrap C++ classes
-   - consider a micro-optimisation
+   - consider a micro-optimization
  - Generated DSO code often larger & slower than application code since it has to be relocatable rather than assume fixed load address.
 *** API + ABI Stability
  - to make changes to ABI but maintain support for old programs must version .so
@@ -1673,7 +1673,7 @@ Even if the algorithm looks at two containers but uses the same position it coun
    - 'start' - temporary breakpoint or main
    - C-x a: gives a TUI (ncurses interface)
      - C-l : refreshes the screen
-     - GDB has a full python interpretor
+     - GDB has a full python interpreter
    - keep .gdbinit simple
      - =set history save=: saves command history across sessions
    - =rwatch foo=: stop when foo is read
@@ -1689,7 +1689,7 @@ Even if the algorithm looks at two containers but uses the same position it coun
    - =valgrind --vgdb ./a.out= for debugging. This runs gdb server
      - because valgrind adds in code so can't be run straight in gdb
  - Sanitizers: come bundled in compiler
-   - do similiar thing to valgrind but are much quicker. There is performance overhead though
+   - do similar thing to valgrind but are much quicker. There is performance overhead though
    - =gcc -fsanitizer=<sanitizer>= (eg. =-fsanitizer=address=)
  - =rr=: reversible debugging
    - can then replay last run, requires recent Intel cpu
@@ -1741,7 +1741,7 @@ Even if the algorithm looks at two containers but uses the same position it coun
  - can use a macro
  - [9:14] global function object
    - define in header then create const object in implementation. Don't need to construct cause always has 1 already
-   - causes problems with header only and multiple instatiations
+   - causes problems with header only and multiple instantiations
  - passing overloaded functions are icky though there are workarounds
 ** C++ Function Templates: How Do They Really Work
    :SOURCE:
@@ -1755,15 +1755,15 @@ Even if the algorithm looks at two containers but uses the same position it coun
      - template has no function like behaviour
  - there is a difference between templated function and function template
  - templates usually defined in headers
- - often characterised as generic algorithms
- - From template compiler can: synthesise function
+ - often characterized as generic algorithms
+ - From template compiler can: synthesize function
    - instantiate function definition
  - explicit specializations: typically compiler that instantiates
    - programmer may specify: for treating specific version in a different way
    - distinguished by template<> (empty brackets)
  - can force a particular specialization is used by providing own type as a substitution for the template parameter
  - specialization are never candidates for overload resolution
- - compiler seeks most specialised of possible function matches
+ - compiler seeks most specialized of possible function matches
 *** Recommended
  - C++ Templates: The Complete Guide 2^{nd} edition: Vandevoorde, Josuttis & Gregor
    - "consider the bible for anything to do with templates"
@@ -1819,7 +1819,7 @@ Even if the algorithm looks at two containers but uses the same position it coun
  - object: anything not a function or reference
  - string literals are statically constructed so are valid for the life of the program
  - =vector::emplace_back=: calls types constructor directly? Creates in place I think
- - =std::array= implemented as struct so contents are directly initialised (doesn't use initializer_list)
+ - =std::array= implemented as struct so contents are directly initialized (doesn't use initializer_list)
  - undefined to use '_' capital letter at start of name
  - ranged for loops create their own hidden variables
  - =-Wshadow=: catches some issues
@@ -1837,7 +1837,7 @@ Even if the algorithm looks at two containers but uses the same position it coun
  - Generators: used to provide multiple values for variables. Test case runs for every value of the generator
    - also can have random numbers
  - Property based testing: working with ranges of data. (not there yet)
-   - will try and find simplist failure case
+   - will try and find simplest failure case
  - BDD: behaviour drive development
 ** Understanding Optimizers
    :SOURCE:
@@ -1851,7 +1851,7 @@ Even if the algorithm looks at two containers but uses the same position it coun
  - const propagation: when knowing value at compile time influences the assembly
    - =find_if= with a function pointer often won't be inlined
  - const often doesn't make a difference to the compiler
- - interesting optimisation with two memcpy and a placement new instead of doing reinterpret_cast [45:00] - isn't const correct
+ - interesting optimization with two memcpy and a placement new instead of doing reinterpret_cast [45:00] - isn't const correct
 
 ** How C++ Debuggers Work
    :SOURCE:
@@ -1860,8 +1860,8 @@ Even if the algorithm looks at two containers but uses the same position it coun
    :END:
  - ELF: ange albertini website has graphic
    - header: what machine, etc.
-   - codes seperated into sections
- - DWARF: linux debug format
+   - codes separated into sections
+ - DWARF: Linux debug format
    - DIES contains all information (functions, files...)
    - used by debugger to get proper info
    - line table info: which lines of source for which machine code
@@ -1873,7 +1873,7 @@ Even if the algorithm looks at two containers but uses the same position it coun
      - generally implemented similarly across platforms
      - debugger takes first byte of instruction and replaces with OXCC instruction (int3) which triggers software interrupts
      - OS registers interrupt handlers
-   - for setting breakpoint on line: takes the DWARF line info and sets break on instruction
+   - for setting breakpoints on line: takes the DWARF line info and sets break on instruction
    - step out: set breakpoint at return address
    - step in: at return address or next instruction in caller
      - working out next instruction requires understanding of target (could jump anywhere)
@@ -1903,7 +1903,7 @@ Even if the algorithm looks at two containers but uses the same position it coun
      - connect to running process in VM [15:45]
  - supports googletest & boost test (finds and runs them with build)
  - VS 2017 supports C++ 11, 14, 17
- - =/permissive-=: guarantee protability, removes VS extensions
+ - =/permissive-=: guarantee portability, removes VS extensions
    - not on by default
  - All compilers are shipped with VS2017 (old VS compilers)
    - want to guarantee everyone can upgrade
@@ -1921,7 +1921,7 @@ Even if the algorithm looks at two containers but uses the same position it coun
    - get function to get underlying type out
    - easy to add own skills (use structs)
    - for operations that create another type [19:10] (minus 2 values to get offset)
- - =std::ration= standardized way of doing rationalised arithmetic at compile time
+ - =std::ration= standardized way of doing rationalized arithmetic at compile time
    - can be used to define ratins for strong types by having ration in the template [26:00]
 
 ** UEFI with Modern C++
@@ -1929,7 +1929,7 @@ Even if the algorithm looks at two containers but uses the same position it coun
    :Author:   Morris Hafner
    :Source:   https://www.youtube.com/watch?v=z6wKEJ-daD4
    :END:
- - BIOS - calls interupts instead of functions
+ - BIOS - calls interrupts instead of functions
  - EFI - coff file format
    - MS calling convention
  - Toolchain: Tianolore EDK II, GNU efibb (easier to use)
@@ -2023,7 +2023,7 @@ Even if the algorithm looks at two containers but uses the same position it coun
  - History: 80s- generic code use macros
    - 87-now: goals of extremely flexible, zero overhead
 *** Templates
- - advantages: flexibility, type safety, specialisation, good run-time performance
+ - advantages: flexibility, type safety, specialization, good run-time performance
  - disadvantages: verbose syntax, duck typing, had error messages, clumsy overloading, week code organization, slow compilation
  - Concepts allow for specifying certain qualities of types
 *** Concepts
@@ -2067,7 +2067,7 @@ Even if the algorithm looks at two containers but uses the same position it coun
    :Author:   Timur Doumler
    :END:
  - full feature list: wg21.link/p0636
- - if with initialisor:
+ - if with initializer:
    #+BEGIN_SRC cpp
    if(auto var = something(); test)
    dosomething();
@@ -2102,7 +2102,7 @@ Even if the algorithm looks at two containers but uses the same position it coun
  - Return Value Optimization
  - Named Return Value Optimizations (something is now fixed)
  - =std::clamp=: constrain value between two given values. Has overload to supply own comparison operator.
- - =std::variant=: data type that can be either of two different types: =std::variant<int, std::string> u;= can be initialised as either an int or string.
+ - =std::variant=: data type that can be either of two different types: =std::variant<int, std::string> u;= can be initialized as either an int or string.
    - =get_if<>= can be used to get value if it is currently of that type.
    - if one tries to put a new element in and it fails then the variant is empty
    - can be used in real time code since never allocates.
@@ -2237,7 +2237,7 @@ Even if the algorithm looks at two containers but uses the same position it coun
   - the visitor shown use variadic templates to inherit from a set of lambdas
   - use base class operator with 
     =using Base::operator()=
-  - seems to use two lambdas as base to provide two potential results depdending on type of argument
+  - seems to use two lambdas as base to provide two potential results depending on type of argument
   - goes on to show how it can be simplified and made mostly constexpr
 *** Ep 145 - Semi Automatic constexpr & noexcept
   - compiler needs to know if can be constexpr for C++ 17 lambdas
@@ -2576,7 +2576,7 @@ He adds reverb to the original signal then mixes it with the binaural sound.
  - Audio proposal
    - =std::experimatal::audio=
    - can get default device and create callback with =.connect=.
- - plan to standardise interface rather than implementation
+ - plan to standardize interface rather than implementation
  - device: audio input/output endpoint
    - supports callback & polling systems
  - =buffer_list=: all input and output buffers
@@ -2596,7 +2596,7 @@ He adds reverb to the original signal then mixes it with the binaural sound.
    - loud sounds mask in freq & time
    - masks before as well (there's a build up and ramps down) Perceptual audio normally treats it as a snapshot and ignores the ramping
  - SMR: Signal to Masked Ratio
- - Take advantage of this to shape quantisation noise
+ - Take advantage of this to shape quantization noise
  - Have to listen to perceptual codecs to test them
    - look at perceptual differences with original
    - in relation to bitrate
@@ -2984,7 +2984,7 @@ He adds reverb to the original signal then mixes it with the binaural sound.
  - it makes changing stat very simple.
 *** Strategy
  - Defines a family of algorithms and makes them interchangeable
- - An interface is created with a base class and specialisations of the algorithm inherit and implement the interface.
+ - An interface is created with a base class and specializations of the algorithm inherit and implement the interface.
  - This allows the client to just make a call to the algorithm and allows the algorithms to be reused.
 *** Template Method
  - Define the skeleton of an algorithm in an operation, deferring some steps to subclasses. Template method lets subclasses redefine certain steps of an algorithm without changing the algorithm's structure.
@@ -3210,7 +3210,7 @@ He adds reverb to the original signal then mixes it with the binaural sound.
  - live update but still achieved with C++
  - still use scheme for data and real time scripting
    - can define custom syntax
- - most studios use json, xml or custom parser which takes a lot of work to change
+ - most studios use json, XML or custom parser which takes a lot of work to change
    - with Scheme just add macro
  - Rebuilding all the Scheme stuff takes twice as long as rebuilding the entire game
  - Don't have Debug builds but instead have a file which specifies files to be built as Debug:
@@ -3400,7 +3400,7 @@ He adds reverb to the original signal then mixes it with the binaural sound.
  - Package Management:
    - crates are published and goes into S3
      - can't be taken down but can be marked as "don't use" (so can't break dependencies)
-   - use cargo to create project will put things in right placeand make it easy to publish
+   - use cargo to create project will put things in right place and make it easy to publish
    - adding dependencies: search crates.io
      - add to dependency section of cargo.toml can also pin to version
    - cargo can be given a script on how to build something so can be used to build other languages
@@ -3521,7 +3521,7 @@ He adds reverb to the original signal then mixes it with the binaural sound.
 *** Pill 9
  NAR is simple deterministic archive format.
  NAR created with =nix-store --dump= & =nix-store --restore=
- patchelf is a command that can shrink the rpath to remove uneeded runtime dependencies (gcc in the example).
+ patchelf is a command that can shrink the rpath to remove unneeded runtime dependencies (gcc in the example).
  Check the dependencies of a derivation as there may be unnecessary packages.
 *** Pill 10
  nix-shell takes the same nix file used to build a derivation.
@@ -3566,7 +3566,7 @@ As data gets passed down each layer it adds a header which includes delivery inf
 
 *** Network Access Layer
 Handles delivering data to actual devices.
-It converts IP addresses to address apropriate for physical network.
+It converts IP addresses to address appropriate for physical network.
 
 *** Internet Layer
 Internet Protocol (IP) is the main protocol of this layer.
@@ -3685,6 +3685,7 @@ Would probably be good if I had looked into allocators ahead of time but needed 
                                                 two))
                       content))))
   (setq org-html-format-drawer-function 'my-org-export-format-drawer)
+  (push '("" "titletoc" nil ("pdflatex")) org-latex-default-packages-alist)
   (org-babel-do-load-languages
   'org-babel-load-languages '((latex . t)))
 #+END_SRC
