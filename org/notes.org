@@ -526,6 +526,46 @@ given an lvalue reference.
 
  class Derived : public Base<Derived>;
  #+END_SRC
+
+** STL Algorithms - Why You Should Use Them, and How to Write Your Own
+   :SOURCE:
+   :Author:   Marshall Clow
+   :Source:   https://www.youtube.com/watch?v=h4Jl1fk3MkQ
+   :END:
+
+Boost algorithms and the Adobe algorithms library are useful collections of algorithms.
+
+The STL implementations often try to minimize the requirements on the processed types
+(eg. will use =<= and ==== rather than =>==).
+
+It's easy to write your own algorithms:
+- Give them a good name
+- Take the range as iterators marking the beginning and end
+- Handle degenerate cases (empty containers (=begin() == end()=), only 1 element, etc.)
+- They should be general but not necessarily universal so it's OK for them to make
+  certain requirements of the types
+- The STL algorithms can be used as building blocks
+  - Many problems can be implemented simply (and more efficiently) with the existing algorithms
+- Worry about complexity
+- Consider the iterator category (input, forward, random access ...)
+  - It can have a big influence in how the algorithm is implemented.
+
+
+=iterator_traits= can be used to get information about the iterator you've been passed
+(including the type it points to).
+=iterator_category= says what type of iterator it is, which can then be used for
+specializations (where the specialized function takes an object for the iterator type).
+#+BEGIN_SRC cpp
+  template <typename FWIter, typename Func>
+  void adjacent_impl(FWIter first, FWIter last, Func f, std::forward_iterator_tag);
+
+  template <typename Iterator, typename Func>
+  void adjacent(Iterator first, Iterator last, Func f) {
+       return adjacent_impl(first, last, f, typename std::iterator_traits<Iterator>::iterator_category());
+  }
+#+END_SRC
+This is what the standard library does a lot.
+
 ** Object-Oriented Program: Best Practices
    :SOURCE:
    :Author:   Jon Kalb
@@ -569,6 +609,64 @@ given an lvalue reference.
  don't actually do anything with the calls).
  So you don't have to cast to D to call a function that only D has if all the other derived
  classes also have that function (but in their cases it might be empty).
+** The C++ ABI From the Ground Up
+   :SOURCE:
+   :Author:   Louis Dionne
+   :Source:   https://www.youtube.com/watch?v=DZ93lP1I7wU
+   :END:
+   The ABI can be thought of as being like the API but for machine
+   code.
+
+   =itanium-cxx-abi= is on GitHub and is the standard for the Itanium C++ ABI.
+   It affects things like
+   - how arguments are passed to functions (it's the same as C for
+     trivial types)
+   - how base classes are layed out (whether the inherited sections
+     are placed before or after in a derived class)
+   - name mangling
+   - vtable layout
+   - RTTI layout
+   - exception handling
+
+   The type of a lambda can't be in a function signature because then
+   it will need to be mangled to make it uniquely identifiable from
+   other lambdas, which would mean mangling based on the body of the
+   lambda.
+
+   Simple changes that make a struct trivial or not will break ABI
+   (because it would be passed on the stack vs. the heap).
+
+   Safe changes that won't break ABI:
+   - add new non-virtual functions
+   - add an enum to a class
+   - add new enumerators to an existing enum
+     - make sure the underlying type doesn't change
+   - define inline functions out of line
+     - it must be OK for programs to call the old version
+   - add new static data members
+   - add new classes
+   - add/remove friend declarations
+
+   The ABI can be controlled using inline namespaces, which are not
+   part of the API but contribute to name mangling. It can be changed
+   when breaking the ABI and the API will stay the same but the linker
+   will see the change.
+
+   Symbol visibility can hide symbols from the ABI surface.
+
+   Linkage is like visibility but for static libraries. Specify
+   internal linkage so the function will be local to the translation
+   unit.
+
+   Vtable and RTTI visibility can be controlled with the visibility
+   attribute.
+
+   =nm -gmU= will list exported symbols nicely.
+
+   =c++filt= demangles names (=nm= can be piped in).
+
+   =abidiff= (from libabigail) gives a human readable differences
+   between ABIs, which could be used as part of CI.
 ** 105 STL Algorithms in Less Than An Hour
    :SOURCE:
    :Author:   Jonathan Boccara
@@ -2263,6 +2361,12 @@ Even if the algorithm looks at two containers but uses the same position it coun
     #+END_SRC
   - provides all the comparison operators
   - need =#include<compare>=
+** Additional
+*** [[https://www.youtube.com/watch?v=FtZEU9zv9eM][Sean Parent - Generic Programming]]
+    - Think of iterators as pointing between elements, not to them
+      - each element is bounded
+      - so =.end()= doesn't point to an element off by 1, it marks the end of the container
+    [Informative, mostly history talk]
 * Audio Programming                                                   :audio:
 ** Using Locks in Real-Time Audio Processing                            :cpp:
    :SOURCE:
@@ -2748,7 +2852,13 @@ He adds reverb to the original signal then mixes it with the binaural sound.
    - other measurements for builds
      - amplitude statistics, spectral properties, total harmonic distortion, SNK, phase delay, peag, speech transmission index
  - Adobe Audition supports scripting to end users. See video for details on setting up.
-
+** Additional
+   Didn't have any notes but are listed here to make it easier to find later
+*** [[https://www.youtube.com/watch?reload=9&v=9kRFK_Z2FRU][Spatial Audio: Showing You What You Already Know]]
+    - Without head movement spectral cues are difficult to hear
+    - 50ms delay starts to sound like a second sound
+    [Really interesting, quite different talk]
+      
 * Maths
 ** Math Symbols Explained with Python
    :SOURCE:
@@ -2799,6 +2909,246 @@ He adds reverb to the original signal then mixes it with the binaural sound.
  - Exclamation: x!
    - Factorial of number (multiply every number from 1 to the given number)
 * SE
+** What Every Programmer Should Know About Memory
+   :SOURCE:
+   :Author: Ulrich Drepper
+   :Source: https://people.freebsd.org/~lstewart/articles/cpumemory.pdf
+   :END:
+
+   Memory stored in a cache is tagged so it can be queried. To save
+   space not every word is tagged, instead cache lines are loaded and
+   the first part of the memory address is used as the tag. The rest
+   of the address (lowest bits) are used as an offset into the cache
+   line. Dealing with cache lines is beneficial because subsequent
+   bits can be accessed in DRAM without selecting a new column or
+   row. Selecting columns or rows takes time. This is based on the
+   assumption that a program is likely to access nearby memory.
+
+   *Fully associative cache:* each cache line can store any memory
+    location. Requires having to compare the tags of every cache line
+    with the requested address making it only practical for very small
+    caches (a few dozen entries max).
+
+   *Direct mapped cache:* each tag maps directly to one cache
+    entry. It's fast but only works well if the addresses used by the
+    program are evenly distributed. This is normally not the case so
+    some cache lines be heavily used (and evicted) while others would
+    be barely used. Each tag mapping directly is the extreme case. It
+    can also be that a middle section of the memory address is used to
+    select a set which stores a tag (the upper part of the
+    address. That tag would be compared to the requested address tag.
+
+   *Set associative cache:* is like direct mapping except there are
+    multiple cached values per set. A set returns multiple tags rather
+    than just 1. These tags can be compared against the requested tag
+    in parallel. Combines the best part of the other schemes, while
+    avoiding most of the weaknesses.
+
+   Hyper-threads are effective when both hyper-threads on a processor
+   are sharing data, Otherwise the effective caches are halved since
+   both hyper-threads will be loading their own data. The processor
+   schedules the other hyper-thread when the first one is waiting
+   (eg. for memory access). If both are spending most of their time
+   waiting for memory then performance is poor.
+
+   Data is transferred to the CPU/cache from main memory in smaller
+   chunks than a cache line [paper has example of 64 bits compared to
+   64 byte cache line]. Sometimes the desired word of data is in the
+   middle or near the end of the cache line meaning if the cache line
+   is loaded in order the CPU will have a long wait. A "critical word"
+   can be requested, which will retrieve the desired word first then
+   load the rest of the cache line into the cache. If the cache line
+   has already started being loaded when the CPU requests a word then
+   the cache continues being loaded in order and the CPU has to wait.
+
+   *Translation Look-Aside Buffer (TLB):* is a very small cache that
+    stores physical page addresses. It's used to convert a virtual
+    address to a physical page. The first part of the virtual address
+    is used as the tag and the last part is used as an offset.
+
+   A TLB miss means doing a page table walk, which can be expensive.
+   The first part of the virtual address is used to navigate page
+   tables (hierarchy of directories that store physical
+   addresses). The last part of the address is the offset into the
+   physical page to get the address.
+
+   When using virtualisation the cost of cache misses is even
+   higher. Work on optimizations will be even more beneficial in
+   virtualized environments.
+
+*** Cache Optimizations
+    It's a waste when data is produced and not immediately consumed
+    since it will take up space in the cache and can evict things that
+    are still being used. Especially for large data structures where
+    before the last element is filled the first element is evicted to
+    cache.
+
+    Can use *non-temporal write operations* to write data straight to
+    memory without caching. The intrinsics for x86-64 are
+    =_mm_stream_*=. Try to work on an entire cache line at once to
+    help with performance. Have to issue all instructions sequentially
+    to help with this. It works best on large amounts of data. Data
+    can be loaded from memory, processed and written straight back.
+
+    *pahole* is a tool to show how structures are layed out in size
+     and on the cache line. It shows where empty space is (for
+     alignment) and suggests optimizations.
+
+    Try to arrange elements in a structure in the order of how likely
+    they are to be accessed. It puts the critical word at the
+    beginning of the cache line. For bigger structs arrange each cache
+    line sized block accordingly.
+
+    Try accessing elements in the order they are defined in a
+    structure.
+
+    Data types have alignment requirements. If an object is not
+    aligned as expected reordering isn't worth it.
+
+    SSE instructions normally require memory to be aligned.
+
+    Consider breaking up data structures if only a small part is
+    regularly accessed. The unused parts will unnecessarily be loaded
+    and occupy cache space meaning fewer objects will fit.
+
+    It's possible for data to use the same set in the cache even if
+    the rest of the cache is not used much (sometimes called a
+    "conflict miss"). Laying out data at boundaries of powers of 2
+    makes this more likely to happen. The L1 cache often uses virtual
+    addresses so is under programmer control. If variables that are
+    used together are stored together then they are less likely to
+    share a set.
+
+    =_mm_prefetch= is a compiler intrinsic to prefetch memory. It has
+    an option to load to L1, L2 & L3 caches and to say when data is
+    evicted from L1 to save to memory. When analyzing a program check
+    the cache misses & add prefetch at the location of many
+    misses. Check the prefetch counters in the CPU counters to check
+    if it helped. Add to one place at a time.
+
+    A helper thread can be used to prefetch data for the main
+    thread. Avoids having complex prefetch code in the main thread. It
+    needs to be synced so the helper can't get too far ahead. If it's
+    a hyper-thread then it will populate the lowest level cache. This
+    is the perfect usecase since they share data and the main thread
+    won't have to wait long.
+
+    If multiple threads are modifying multiple variables that are all
+    on the same cache line there will be conficts because the whole
+    cache line will be passed between processors. Move variables that
+    are often written to by multiple threads on to their own cache
+    line. Group read/write variables that are normally used together
+    into a struct.
+
+    [details on atomics]
+
+    Bus to memory bandwidth can be limiting. Two threads running on
+    different cores using the same data set makes data read twice. Set
+    the thread affinity so they are run on the same core.
+
+    The opposite situation is also bad, where two threads running on
+    the same core using two data sets will exhaust the cache so will
+    read from main memory more often. Set the affinity to run on
+    different cores.
+**** Optimize L1 Instruction Cache
+     Code is normally linear so it is easy to prefetch except for
+     jumps, which is why CPUs use branch prediction. Instruction
+     caches store decoded instructions.
+
+     Reduce the code footprint since smaller code can put less
+     pressure on caches. =-Os= optimizes for code size. Optimizing for
+     size should be balanced against other optimizations like loop
+     unrolling and inlining.
+
+     Inlining functions might be good for the optimizer but if it is
+     used in lots of places it will bloat the code size. This will
+     mean the cache will have to store the same code multiple times
+     and if that causes evictions then the CPU will decode the
+     instructions again. If a small function is not inlined it can be
+     referenced in the cache and the branch predictor may work out
+     that it will be called. It depends how aggressive the
+     optimizations would have been if it had been inlined.
+
+     Code should be linear. If an =if= condition is normally false and
+     it contains lots of code (or an inlined function) then the cache
+     must store lots of unused code that will be jumped over. It is
+     better if the contents of the =if= statement are out of the main
+     code path so the jump only happens when the (unlikely) =if=
+     condition is true.
+
+     =__builtin_expect= says what an expression will normally be. Use
+     it with the following macros to indicate the condition of an =if=
+     statement.
+     #+BEGIN_SRC C++
+       #define unlikely(expr) __builtin_expect(!!(expr), 0)
+       #define likely(expr) __builtin_expect(!!(expr), 1)
+
+       // Used as:
+       if (likely(a>1))
+     #+END_SRC
+     Then =-freorder-blocks= will reorder the blocks so the unlikely
+     block will be outside the main code path (disabled by =-Os= but
+     enabled by =-O2=).
+
+     Alignment can have an effect on code. Align:
+     - functions with =-falign-functions=N=
+     - blocks only reachable by jumps with =-falign-jumps=N=
+     - loops with -falign-loops=N (requires padding in the code, can
+       have runtime cost).
+
+     If =N= is too high it will waste space on small/little used
+     functions.
+**** L2+ Caches
+     Match the working set sizes to the cache sizes.
+
+     L1 cache size can be hardcoded and optimized for (assume the
+     largest). L2 caches can't be.
+**** Optimize TLB Usage
+     Reduce the number of pages a program uses.
+
+     Reduce the number of higher level directory tables needed which
+     makes lookup cheaper.
+**** Measurement
+     *Oprofile* is a tool for seeing processor counters.
+     *pfmon* as well.
+
+    *opannotate* annotates source/assembly with events from the CPU
+     counters. The exact positions of events might not be represented
+     accurately.
+
+    The OS keeps track of page faults (major & minor). The =time=
+    command (not the shell builtin) reports faults. When the program
+    starts all pages that are requested will be page fault, the more
+    requested the longer startup will take.
+
+    *rusage* provides various resource usages of a process. Position
+     of the page fault could be found by repeatedly requesting
+     resource info.
+
+    *cachegrind* simulates cache use and allows for specifying
+     different cache parameters (size, associativity). *cg_annotate*
+     displays output of cachegrind & can annotate source files. It's
+     just a simulation so likely to be different to hardware but it
+     gives a good impression.
+
+    *massif* measures memory usage (and can show stack usage).
+
+    *memusage* is another tool to measure memory usage. It's part of
+     the GNU C library. It's not a simulation so it's faster than
+     massif.
+
+     The performance of lots of small allocations could be improved by
+     1 large one and then manage memory internally [good use for =pmr=?].
+**** Improve Branch Prediction
+     [Has source of =likely=/=unlikely= macros in Appendix A that
+     check at runtime whether actual decision matches]
+
+     *Program Guided Optimization (PGO):*
+     - compile the program with =-fprofile-generate=
+     - run tests that represent workflow. The binary profiles which
+       branches are taken and outputs the data as files.
+     - recompile the program with =-fprofile-use= to optimize based on
+       the measured data.
 ** Introduction to Algorithms
 *** Lecture 1
     :SOURCE:
@@ -2828,7 +3178,7 @@ He adds reverb to the original signal then mixes it with the binaural sound.
    - asymptotically slower algorithms can be useful depending on size of problem.
    - Could be the faster algorithm is only faster when testing with impractically large problem.
 ** Ring Buffers and Queues
-   :PROPERTIES:
+   :SOURCE:
    :Author:   Fabian Giesen
    :Source:   https://fgiesen.wordpress.com/2010/12/14/ring-buffers-and-queues/
    :END:
@@ -2997,7 +3347,7 @@ He adds reverb to the original signal then mixes it with the binaural sound.
    - the base class has functions for each of the objects the visitors will operate on.
    - those objects have a function that takes a visitor. This function calls the relevant function for the object on the passed in visitor. The object provides the this pointer.
    - The visitor can then operate on the object
-
+     
 * Lisp
 ** Debugging Lisp
    :SOURCE:
@@ -3269,7 +3619,7 @@ He adds reverb to the original signal then mixes it with the binaural sound.
  - added debug info so can debug CL with lldb & gdb
  - uses C++ exceptions for unwinding the stack
 ** Lots of Bits of Lisp: Macros
-   :PROPERTIES:
+   :SOURCE:
    :Source:   https://www.youtube.com/watch?v=ygKXeLKhiTI
    :END:
  - different types of macros that happen at different stages of compilation: reader macros, symbol macros, regular macros, compiler macros
@@ -3301,7 +3651,7 @@ He adds reverb to the original signal then mixes it with the binaural sound.
    - if you need a macro try to get the macro to call a function to do the actual work
 
 ** Lots of Bits of Lisp - CFFI
-   :PROPERTIES:
+   :SOURCE:
    :Source:   https://www.youtube.com/watch?v=A5CnYlG7sc8
    :END:
  - CFFI is a library that provides a common interface for different implementations' FFI
@@ -3446,7 +3796,7 @@ He adds reverb to the original signal then mixes it with the binaural sound.
  - macro system is untyped so everything is still symbols & lists at macro expansion time
 
 ** Julia: To Lisp or Not to Lisp                                      :julia:
-   :PROPERTIES:
+   :SOURCE:
    :Author:   Stefan Karpinski
    :Source:   https://www.youtube.com/watch?v=dK3zRXhrFZY
    :END:
@@ -3481,6 +3831,37 @@ He adds reverb to the original signal then mixes it with the binaural sound.
    - macros not allowed in local scopes
  - Generated function:
    - functions that generates LLVM IR after all types have been determined
+** A Ray of Hope: Array Programming for the 21st Century
+   :SOURCE:
+   :Author: Gilad Bracha
+   :Source: https://www.youtube.com/watch?v=x1FoTYnJxeY&feature=youtu.be
+   :END:
+
+   In array programming everything is a multidimensional array and all operations are
+   applied to the arrays.
+   It makes the notation close to the underlying maths and all iteration is implicit.
+   APL is the main language for that.
+
+   Speaker is working on ShapeRank as an evolution of array programming.
+   Is working on using streams instead of arrays, has some interesting implications
+   which are discussed.
+   When dealing with static typing the function signatures deal with the size of the arguments
+   and the returns.
+** A Slice Through the History of Programming Languages
+   :SOURCE:
+   :Author:  Gilad Bracha
+   :Source: [[https://www.youtube.com/watch?v=91fjAbsJdUo]]
+   :END:
+
+   [An interesting look at very early computing and why tools are so line oriented]
+   [Interesting introduction to APL & comparison to functional programming]
+
+   A lot of functional programming can be "operating" on other
+   functions that build up a function which does all the desired work
+   before applying that to the data. Rather than several individual
+   operations to modify the data bit by bit.
+** Additional
+   - [[https://www.youtube.com/watch?v=jmRE5pXFi04&feature=youtu.be]["All of this has happened before, and it will all happen again." : Mark Allen]]
 * IT
 ** Nix Pills
 *** Pill 3
@@ -3648,6 +4029,7 @@ TCP: reliable connection oriented byte stream protocol
 
 * Additional
 Didn't have any notes but are listed here to make it easier to find later
+** [[https://ambrevar.xyz/lisp-repl-shell/index.html][A Lisp REPL as My Main Shell]]                                        :lisp:
 ** [[https://alhassy.github.io/TypedLisp.html][Typed Lisp, A Primer]]                                                :lisp:
 ** [[https://medium.com/@MartinCracauer/static-type-checking-in-the-programmable-programming-language-lisp-79bb79eb068a][Static type checking in the programmable programming language (Lisp)]] :lisp:
 ** [[https://www.youtube.com/watch?v=DHx9kv74Mlc&list=WL&index=6&t=0s][Using Locks in Real Time Audio Processing, Safely]]
