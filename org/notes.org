@@ -10,7 +10,7 @@
 Notes on books and talks I've consumed to make it easy to me to find later.
 
 * C++                                                                   :cpp:
-** atomic<> Weapons: The C++11 Memory Model and Modern Hardware
+** atomic<> Weapons: The C++11 Memory Model and Modern Hardware Part 1
    :SOURCE:
    :Author: Herb Sutter
    :Source: https://channel9.msdn.com/Shows/Going+Deep/Cpp-and-Beyond-2012-Herb-Sutter-atomic-Weapons-1-of-2
@@ -24,11 +24,10 @@ Notes on books and talks I've consumed to make it easy to me to find later.
    have a check *then* you do something. Something could happen before
    the check.
 
-   There are a lot of reordering optimizations that can be done on
-   single-threaded code because the it just has to produce the same
-   observable result. The compiler has less certainties about
-   multi-threaded code. Mutexes & atomics tells the compiler what
-   happens with shared data because it can't know.
+   If a compiler can prove a modification won't have an observable
+   difference then it can do it. In a multi-threaded environment there
+   is a lot less that the compiler can prove. Mutexes & atomics tells
+   the compiler what happens with shared data because it can't know.
 
    The compiler can't reorder code to add a race condition (eg. moving
    code outside a mutex lock/unlock region) but it can move operations
@@ -67,6 +66,89 @@ Notes on books and talks I've consumed to make it easy to me to find later.
    happen. They are non-portable and error-prone (hard to reason
    about). Full fences stop reordering above & below the fence (unlike
    acquire/release).
+** atomic<> Weapons Part 2
+   :SOURCE:
+   :Author: Herb Sutter :Source:
+   http://channel9.msdn.com/Shows/Going+Deep/Cpp-and-Beyond-2012-Herb-Sutter-atomic-Weapons-2-of-2
+   :END:
+
+   C/C++ memory model makes it illegal to invent a write to a
+   variable. Example where two threads each have a variable each
+   protected by a mutex. If both are on same cache line a thread could
+   load both variables, modify 1 and then write the whole cache line
+   back to memory. It would modify the variable it shouldn't by
+   writing it's "original" value, which would cause problems if other
+   thread wanted to modify that variable.
+
+   Same problem if both variables are in a struct. The compiler will
+   make sure that a variable that is not used isn't touched. Either
+   with instructions or padding to make sure variables are on a
+   different cache line.
+
+   Not the case for bitfields. Adjacent bitfields count as 1
+   "object". Parts of a bitfield might be less than a byte so most
+   processors won't be able to load 1 without loading (at least part of)
+   the other since most processors won't work on anything less than a
+   byte.
+
+   Atomic loads need to be cheap. But can afford to pay more for
+   stores since programs load more than they store.
+
+   x86 provides SC atomics quite cheaply. It has a strict memory
+   model.
+
+   POWER IA SC loads are expensive (which is half the reason relaxed
+   atomics exist in C++).
+
+   ARM v7 needs a memory barrier for SC loads (the other half of the
+   reason for relaxed atomics).
+
+   Arm v8 has SC-DRF atomic loads & stores.
+
+   SC-DRF (SC for Data Race Free) is the memory model that software
+   has converged on, which means hardware needs to support it. A more
+   strict memory model in hardware means leaving performance available
+   but a less strict memory model means having to reach for more
+   strict features (like full fences) (synchronization) costing
+   performance.
+
+   [ *Strongly advises not to use relaxed atomics* ]
+
+   Relaxed atomics are dangerous but can be useful for high
+   performance work on ARM v7 & POWER. They aren't SC so can be
+   extremely difficult to reason about ("Start to lose
+   simultaneously"). They only affect ordering (they are still atomic
+   operations).
+
+   =memory_order_*= :
+   - =relaxed= : weakest option. Operation can be moved around with no
+     ordering guarantees.
+   - =acquire=
+   - =release=
+   - =acq_rel= : like =seq_cst= but not SC. Plain acquire release.
+   - =order_consume= : like acquire but more complex. Very hard.
+   - =sec_cst= : default. SC.
+
+   Blindly incrementing a counter in launched threads then only
+   checking the value after all the threads are joined is example
+   where =memory_order_relaxed= is OK.
+
+   Simple flag setting: where worker threads do something until a flag
+   is set by the main thread then exit. Accessing the flag from the
+   workers can be relaxed because it doesn't matter when the message
+   gets there just that it does (and it definitely will). Setting the
+   flag from the main thread must be SC (it should be reordered since
+   it could end up before the threads are launched or a timer). If the
+   threads can set a flag that triggers work on the main thread then
+   it should be acquire/release (release on the workers and acquire on
+   the main thread) since it publishes data. Doing something and
+   reading other state based on a flag indicates a release.
+
+   Generally SC is fine but relaxed atomics could be worth it in a
+   tight loop where you want more optimisations (like loop unrolling).
+
+   =volatile= for dealing with things outside the memory model
+   (eg. hardware).
 ** Back to Basics: Move Semantics (part 1)
    :SOURCE:
    :Author: Klaus Iglberger
