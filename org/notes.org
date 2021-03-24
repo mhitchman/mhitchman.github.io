@@ -10,6 +10,24 @@
 Notes on books and talks I've consumed to make it easy to me to find later.
 
 * C++                                                                   :cpp:
+** Back to Basics: Lambdas from Scratch
+   :SOURCE:
+   :Author: Arthur O'Dwyer
+   :Source: https://www.youtube.com/watch?v=3jCOwajNch0
+   :END:
+   Only captureless lambdas are convertible to function pointers.
+   Unary =+= converts lambdas to a function pointer: =+[](int
+   x){return x + 1}= becomes =int( * )(int)= since unary =+= only
+   works on scalar types (including function pointers) so an implicit
+   conversion is done. This is useful to avoid unnecessary template
+   instantiation because otherwise every time a templated function is
+   called with a lambda it will create an instance for each lambda
+   used (since lambdas have unique types).
+
+   Lambdas are objects. Capture lists add data members.
+
+   In a lambda =this= means whatever it meant in the outer scope that
+   contains the lambda.
 ** atomic<> Weapons: The C++11 Memory Model and Modern Hardware Part 1
    :SOURCE:
    :Author: Herb Sutter
@@ -290,25 +308,27 @@ given an lvalue reference.
 
  Providing data to be passed with a callback is apparently a closure.
 *** Chapter 3: Patterns
- PIMPL idiom hides impl details by putting them in another class (the impl class).
- The impl class is forward declared in the header and then just a pointer to it is used
- (opaque pointer).
- The problem with a default copy constructor is it does a shallow clone so the copied objects
- will have opaque pointers to the same impl object.
- You can either delete or specify custom copy functions.
- In the case that you actually want copies to share the impl then use a =shared_ptr= to 
+ PIMPL idiom hides impl details by putting them in another class (the
+ impl class).  The impl class is forward declared in the header and
+ then just a pointer to it is used (opaque pointer).  The problem with
+ a default copy constructor is it does a shallow clone so the copied
+ objects will have opaque pointers to the same impl object.  You can
+ either delete or specify custom copy functions.  In the case that you
+ actually want copies to share the impl then use a =shared_ptr= to
  avoid the impl being deleted twice (by the copy and by the original).
 
- Dependency injection involves passing an object into a class rather than having the class create
- and store the object itself.
- This saves the class needing to know the details needed to initialize the dependency object.
- It provides an alternative to a singleton because the passed object could be global but it is
- easier to test because the object can be mocked.
- The class could be created by a factory which maintains a constructed dependency object to pass in.
+ Dependency injection involves passing an object into a class rather
+ than having the class create and store the object itself.  This saves
+ the class needing to know the details needed to initialize the
+ dependency object.  It provides an alternative to a singleton because
+ the passed object could be global but it is easier to test because
+ the object can be mocked.  The class could be created by a factory
+ which maintains a constructed dependency object to pass in.
 
- If a class has virtual methods always declare the destructor as virtual.
- If it is not declared virtual and the inheriting class is assigned to a base class pointer before
- being destroyed then the base class' destructor will be called (rather than the inheriting class').
+ If a class has virtual methods always declare the destructor as
+ virtual.  If it is not declared virtual and the inheriting class is
+ assigned to a base class pointer before being destroyed then the base
+ class' destructor will be called (rather than the inheriting class').
 *** Chapter 4: Styles
  Functional requirements specify how the API should behave.
  It doesn't include operation constraints (performance, security, usability, etc.) 
@@ -2521,6 +2541,7 @@ Even if the algorithm looks at two containers but uses the same position it coun
       - each element is bounded
       - so =.end()= doesn't point to an element off by 1, it marks the end of the container
     [Informative, mostly history talk]
+*** [[https://www.youtube.com/watch?v=61DSCW2KL3U][Michael Spertus - “Inference in C++: The big picture”]]
 * Audio Programming                                                   :audio:
 ** Using Locks in Real-Time Audio Processing                            :cpp:
    :SOURCE:
@@ -3007,12 +3028,11 @@ He adds reverb to the original signal then mixes it with the binaural sound.
      - amplitude statistics, spectral properties, total harmonic distortion, SNK, phase delay, peag, speech transmission index
  - Adobe Audition supports scripting to end users. See video for details on setting up.
 ** Additional
-   Didn't have any notes but are listed here to make it easier to find later
 *** [[https://www.youtube.com/watch?reload=9&v=9kRFK_Z2FRU][Spatial Audio: Showing You What You Already Know]]
     - Without head movement spectral cues are difficult to hear
     - 50ms delay starts to sound like a second sound
     [Really interesting, quite different talk]
-      
+*** [[https://www.youtube.com/watch?v=fGuT9zoQ_JA][Russel McClellan - A practical perspective on deep learning in audio software]]
 * Maths
 ** Math Symbols Explained with Python
    :SOURCE:
@@ -3443,14 +3463,16 @@ He adds reverb to the original signal then mixes it with the binaural sound.
    - The createMaze code could remain the same no matter what Maze was being made.
 *** Bridge
  - Allows an implementation to be kept separate from its interface
-   - this allows the implementation to be changed without recompilation of client code
+   - this allows the implementation to be changed without
+     recompilation of client code
    - hides the implementation completely from the client. The interface they see is very pure, it requires no implementation details.
    - allows for multiple implementations
  - Implemented by making a class hierarchy for the interface and a separate one for the implementation.
  - Interface often has higher order functions which are implemented in terms of the lower level functions in the implementation.
  - The interface class has a pointer or owns an instance of the Implementation to call
 *** Decorator
- - used to change the responsibilities of an object while maintaining the same interface
+ - used to change the responsibilities of an object while maintaining
+   the same interface
  - contains the object and passes the data on to it though after performing some processing first
    - e.g. drawing a border around a window
  - Since everything has same interface it can be used where object would be and can stack multiple decorators
@@ -3498,8 +3520,11 @@ He adds reverb to the original signal then mixes it with the binaural sound.
  - Works by:
    - defining a base visitor class
    - creating concrete visitor classes
-   - the base class has functions for each of the objects the visitors will operate on.
-   - those objects have a function that takes a visitor. This function calls the relevant function for the object on the passed in visitor. The object provides the this pointer.
+   - the base class has functions for each of the objects the visitors
+     will operate on.
+   - those objects have a function that takes a visitor. This function
+     calls the relevant function for the object on the passed in
+     visitor. The object provides the this pointer.
    - The visitor can then operate on the object
      
 * Lisp
