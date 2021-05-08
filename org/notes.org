@@ -4208,6 +4208,14 @@ TCP: reliable connection oriented byte stream protocol
 
 * Additional
 Didn't have any notes but are listed here to make it easier to find later
+** Evolution of Forth
+** [[https://stevelosh.com/blog/2021/03/small-common-lisp-cli-programs/][Writing Small CLI Programs in Common Lisp]]                           :lisp:
+** [[https://www.youtube.com/watch?v=kMivYV0pEMw&list=WL&index=11][Creating a Common Lisp implementation (Part 3)]]                      :lisp:
+   About the process of bootstrapping an CL implementation using an
+   existing implementation.
+** [[https://www.youtube.com/watch?v=lw6TaiXzHAE&list=WL&index=7&t=115s][Growing a Language]]
+**  Four Languages from Forty Years Ago
+** [[https://www.youtube.com/watch?v=HB5TrK7A4pI&list=WL&index=6][Gerald Sussman - We Really Don't Know How to Compute]]
 ** [[https://ambrevar.xyz/lisp-repl-shell/index.html][A Lisp REPL as My Main Shell]]                                        :lisp:
 ** [[https://alhassy.github.io/TypedLisp.html][Typed Lisp, A Primer]]                                                :lisp:
 ** [[https://medium.com/@MartinCracauer/static-type-checking-in-the-programmable-programming-language-lisp-79bb79eb068a][Static type checking in the programmable programming language (Lisp)]] :lisp:
