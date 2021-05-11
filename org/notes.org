@@ -10,6 +10,52 @@
 Notes on books and talks I've consumed to make it easy to me to find later.
 
 * C++                                                                   :cpp:
+** Back to Basics: Algebraic Data Types
+   :SOURCE:
+   :Author: Arthur O'Dwyer
+   :Source: https://www.youtube.com/watch?v=OJzmWqCCZaM
+   :END:
+   Algebraic data types are =std::pair=, =std::tuple=,
+   =std::optional= and =std::variant=.
+
+   =std::pair= and =std::tuple= are product types because the number
+   of potential states they can be in is the number of states their
+   contained types can be in multiplied together (=pair<uint8_t, bool=
+   would have 256 * 2 = 512 possible states). The contained types are
+   layed out in memory with some padding, similar to a struct. Prefer
+   a named struct to using these in a public API. Using them to hold
+   reference types will allow the original values to be assigned
+   through the =pair/tuple=. =std::tie= can be used like structured
+   binding. Use =std::ignore= to ignore parts of the returned
+   =pair/tuple= that you don't want to assign to something. =std::tie=
+   creates a tuple of references.
+
+   =variant= is a sum type because the number of potential states is
+   the alternative types' number of states added together
+   (=variant<uint8_t, bool>= would have 256 + 2 = 258 possible
+   states). Alternatives occupy the same memory (like a union) with an
+   index to indicate, which member is active. Use =get_if<T>= to get a
+   pointer to the contained object; it will return =nullptr= if it
+   doesn't have a =T=. Can also wrap all possible types into a generic
+   lambda and then use =std::visit=. =variant::valueless_by_exception=
+   tests if an exception during =emplace= caused no value to be in the
+   variant (=emplace= will destruct the held value before constructing
+   the new one, if the construction throws an exception the variant
+   will end up holding nothing).
+
+   =optional= is a sum type. It's like a =variant= with two types but
+   the second type is =nullopt= (which is not saved in memory). It can
+   be used for variables with dynamic lifetime without having to use
+   the heap. When it has a value it's called "engaged" and
+   "disengaged" when it has no value.
+
+   =optional= and =variant= accept =in_place= tag type to make it
+   construct in place.
+
+   All the types work with comparison operators. =pair= & =tuple= look
+   at all the elements in order. =optional<T>= compares as a =T= with
+   the =nullopt= always being less (so disengaged =optional= comes
+   before an engaged =optional=).
 ** Back to Basics: Lambdas from Scratch
    :SOURCE:
    :Author: Arthur O'Dwyer
