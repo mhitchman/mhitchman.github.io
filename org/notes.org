@@ -10,6 +10,72 @@
 Notes on books and talks I've consumed to make it easy to me to find later.
 
 * C++                                                                   :cpp:
+** Monoids, Monads, and Applicative Functors: Repeated Software Patterns
+   :SOURCE:
+   :Author: David Sankel
+   :Source: https://www.youtube.com/watch?v=giWCdQ7fnQU
+   :END:
+
+   Monoid: a type with a binary operation ⊕ where the operation must
+   be associative (a ⊕ b ⊕ c = a ⊕ (b ⊕ c)) and have a special value
+   'e' so x ⊕ e = e ⊕ x = x for all values of x. Eg. numbers with plus
+   is a monoid, e = 0; numbers with multiplication, e = 1; std::vector
+   and concatenation, e = empty vector. 0 or more monoids can be
+   squashed together. If there are 0 monoids then just get e.
+
+   =std::optional= of a monoid is a monoid. The operator is applied if
+   both operands have a value otherwise return only the one that has a
+   value (or a disengaged optional if both are disengaged).
+
+   Monoids scale well and are composable with functions and
+   optional. Functions of the same type that return monoids are also
+   monoids. They are a highly parallel pattern.
+
+   Functors are like class templates with a single template
+   parameter. There is a map function which takes a Functor of type A
+   and a function, which takes an A and returns a. Then map returns a
+   functor of type B.
+   #+BEGIN_SRC cpp
+     template <typename A, typename B>
+     Functor<B> map(std::function<B(A)>, Functor<A>);
+   #+END_SRC
+   Giving map the identity function will not change the functor.
+
+   =std::optional= and =std::vector= are functors. =std::pair= can be
+   a functor if one template parameter is fixed and the function
+   passed to map only modifies the other parameter.
+
+   Applicative Functors are functors with extra operations. 'pure'
+   creates a new applicative of type T from a T (ie. wraps a value in
+   a container). 'Apply' calls an applicative function on an
+   applicative value to get an applicative result.
+   #+BEGIN_SRC cpp
+     template<typename T>
+     optional<T> pure(T t);
+
+     template<typename T, typename U>
+     optional<U> apply(optional<function<U(T)>> a, optional<T> b);
+   #+END_SRC
+   It can be used to propagate errors in the case of =optional= because
+   the null will be the result of any operation where one of the
+   operands is null. For =std::vector= apply would take a =vector= of
+   functions and a =vector= of values and call every function for
+   every value and store the results in a vector. And pure would stick
+   a single value into a new =vector=.
+
+   Monads are applicative functors with a join operation. Join takes a
+   Monad<Monad<T>> and returns Monad<T>. See [[https://en.m.wikibooks.org/wiki/Haskell/Category_theory][Haskell/Category Theory
+   Wikibook]] for monad rules.
+   #+BEGIN_SRC cpp
+     optional<T> join(optional<optional<T>> a)
+     {
+         if (a) { return *a; }
+         else { return std::nullopt; }
+     }
+   #+END_SRC
+   Monadic bind operations are constructed using pure, apply and
+   join. It looks like imperative programming and allows for
+   expressing different models of computation in C++.
 ** Back to Basics: Algebraic Data Types
    :SOURCE:
    :Author: Arthur O'Dwyer
@@ -2578,6 +2644,8 @@ Even if the algorithm looks at two containers but uses the same position it coun
    - Try to avoid casting by writing code that works with all derived
      classes (even if some don't do anything with the call).
 ** Additional
+*** [[https://www.youtube.com/watch?v=AGRWRwi7rD0][Sy Brand - Building an Intuition for Composition]]
+    Bit of category theory in C++? One to come back to when you know more.
 *** [[https://www.youtube.com/watch?v=1uLTspBEtRE][Matt Godbolt - Why C++ Isn't Dead]]
     - Has an RMS example & with =-O3= and =-march=native= it
       automatically vectorises.
@@ -4087,6 +4155,7 @@ He adds reverb to the original signal then mixes it with the binaural sound.
    operations to modify the data bit by bit.
 ** Additional
    - [[https://www.youtube.com/watch?v=jmRE5pXFi04&feature=youtu.be]["All of this has happened before, and it will all happen again." : Mark Allen]]
+   - * [[https://www.youtube.com/watch?v=Gv2I7qTux7g][The Road to Zig 1.0 - Andrew Kelley]]
 * IT
 ** Nix Pills
 *** Pill 3
@@ -4254,6 +4323,9 @@ TCP: reliable connection oriented byte stream protocol
 
 * Additional
 Didn't have any notes but are listed here to make it easier to find later
+** [[https://www.youtube.com/watch?v=uwiaT3MoDVs][Knit, Chisel, Hack: Building Programs in Guile Scheme" - Andy Wingo]]
+   Overview of GNU Guile and its features.
+** [[https://www.youtube.com/watch?v=eWXoKjWCh60][Building a whole distro on top of a minimalistic language; The story of Gnu Guix]]
 ** Evolution of Forth
 ** [[https://stevelosh.com/blog/2021/03/small-common-lisp-cli-programs/][Writing Small CLI Programs in Common Lisp]]                           :lisp:
 ** [[https://www.youtube.com/watch?v=kMivYV0pEMw&list=WL&index=11][Creating a Common Lisp implementation (Part 3)]]                      :lisp:
