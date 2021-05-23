@@ -10,6 +10,55 @@
 Notes on books and talks I've consumed to make it easy to me to find later.
 
 * C++                                                                   :cpp:
+** Constructing Generic Algorithms: Principles and Practice
+   :SOURCE:
+   :Author: Ben Deane
+   :Source: https://www.youtube.com/watch?v=InMh3JxbiTs
+   :END:
+
+   [Goes through designing an algorithm and how to make it
+   generic. Lots of useful points to consider]
+
+   Good algorithms support:
+   - 0 length sequences
+   - even and odd length sequences
+   - various edge cases specific to the algorithm
+
+   Consider iterator categories
+   - am I using a standard library algorithm and what iterator does that require?
+   - do I look at an element after moving past? If yes it must at
+     least be a forward iterator.
+   - do I return an element after moving past? If yes must at least be
+     a forward iterator.
+   - do I need to decrement the iterator? If yes must be at least a
+     bidirectional iter.
+   - do I need to increment/decrement by more than 1? Then might need
+     a random access iterator.
+   - Some algorithms have better complexity using stricter iterators.
+
+   Computers can half and double very efficiently (compared to normal
+   multiplication and division).
+
+   Test with different types to explore the type requirements.
+
+   Document:
+   - pre/post conditions.
+   - type requirements
+   - return value
+   - complexity guarantees:
+     - how many applications of comparison
+     - how many swaps, constructions and conversions?
+     - it may vary with iterator category
+   - exception behaviour
+
+   The order of parameters for algorithms in the standard library is
+   1. Execution Policy
+   2. Iterator pair / iterator and length
+   3. other input iterators
+   4. output iterators
+   5. initialization value
+   6. predicate / comparison
+   7. projection / transformation
 ** Monoids, Monads, and Applicative Functors: Repeated Software Patterns
    :SOURCE:
    :Author: David Sankel
@@ -4155,7 +4204,7 @@ He adds reverb to the original signal then mixes it with the binaural sound.
    operations to modify the data bit by bit.
 ** Additional
    - [[https://www.youtube.com/watch?v=jmRE5pXFi04&feature=youtu.be]["All of this has happened before, and it will all happen again." : Mark Allen]]
-   - * [[https://www.youtube.com/watch?v=Gv2I7qTux7g][The Road to Zig 1.0 - Andrew Kelley]]
+   - [[https://www.youtube.com/watch?v=Gv2I7qTux7g][The Road to Zig 1.0 - Andrew Kelley]]
 * IT
 ** Nix Pills
 *** Pill 3
